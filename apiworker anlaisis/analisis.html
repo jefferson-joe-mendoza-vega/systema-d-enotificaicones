@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Verificador de nombreSW</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      margin: 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .user-info {
+      margin-bottom: 20px;
+      background: #f5f5f5;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    .controls {
+      margin: 20px 0;
+      padding: 10px;
+      background-color: #f5f5f5;
+      border-radius: 5px;
+    }
+    #loading {
+      padding: 20px;
+      background-color: #f8f9fa;
+      border-radius: 4px;
+      text-align: center;
+    }
+    #noMatch {
+      padding: 20px;
+      background-color: #fff3cd;
+      border: 1px solid #ffeeba;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+    #success {
+      display: none;
+      padding: 20px;
+      background-color: #d4edda;
+      border: 1px solid #c3e6cb;
+      border-radius: 4px;
+      color: #155724;
+      margin-bottom: 20px;
+    }
+    #analysisResults {
+      display: none;
+      background-color: #f0f8ff;
+      padding: 15px;
+      border-radius: 5px;
+      border: 1px solid #b8daff;
+      margin-top: 20px;
+      overflow-x: auto;
+    }
+    pre {
+      background-color: #f8f9fa;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+    .success {
+      background-color: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+      padding: 15px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+    .error {
+      background-color: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+      padding: 15px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+    .highlight {
+      font-weight: bold;
+      color: #0056b3;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+  </style>
+</head>
+<body>
+  <h1>Verificador de nombreSW</h1>
+  
+  <div class="user-info">
+    <strong>Usuario:</strong> jefferson-joe-mendoza-vega<br>
+    <small>Fecha: 2025-03-11 20:16:20 (UTC)</small>
+  </div>
+
+  <div class="controls">
+    <label for="nombreSwInput">Nombre a verificar: </label>
+    <input type="text" id="nombreSwInput" value="perfumeria667">
+    <br><br>
+    <button id="checkButton">Verificar</button>
+  </div>
+
+  <div id="loading">
+    <p>Verificando...</p>
+  </div>
+
+  <div id="success" style="display: none;">
+    <h2>Verificación exitosa</h2>
+    <p>El nombre <strong id="matchedName"></strong> ha sido verificado correctamente y la fecha es válida.</p>
+  </div>
+
+  <div id="noMatch" style="display: none;">
+    <h2>No se encontró coincidencia</h2>
+    <p>El nombre proporcionado no existe en la base de datos o la fecha no es válida.</p>
+  </div>
+
+  <div id="analysisResults">
+    <h2>Resultados del análisis</h2>
+    <pre id="analysisJson"></pre>
+    
+    <div id="analysisDetails"></div>
+  </div>
+
+  <script>
+    // IMPORTANTE: Actualiza la URL según tu configuración
+    const WORKER_URL = 'https://quiet-frog-4ad6.innovatools069.workers.dev/';
+    
+    document.getElementById('checkButton').addEventListener('click', performCheck);
+    
+    // También permitir verificar presionando Enter en el campo de texto
+    document.getElementById('nombreSwInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        performCheck();
+      }
+    });
+    
+    async function performCheck() {
+      const nombreSW = document.getElementById('nombreSwInput').value.trim();
+      if (!nombreSW) {
+        alert('Por favor ingrese un nombre para verificar');
+        return;
+      }
+      
+      // Mostrar estado de carga
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('success').style.display = 'none';
+      document.getElementById('noMatch').style.display = 'none';
+      document.getElementById('analysisResults').style.display = 'none';
+      
+      try {
+        // Primero realizar la verificación normal
+        const normalResponse = await fetch(`${WORKER_URL}?nombre=${encodeURIComponent(nombreSW)}`);
+        if (!normalResponse.ok) throw new Error('Error en la solicitud: ' + normalResponse.status);
+        
+        const content = await normalResponse.text();
+        document.getElementById('matchedName').textContent = nombreSW;
+        
+        // Luego obtener los datos de análisis (siempre)
+        const analysisResponse = await fetch(`${WORKER_URL}?nombre=${encodeURIComponent(nombreSW)}&analisis=true`);
+        const analysisData = await analysisResponse.json();
+        
+        // Ocultar estado de carga
+        document.getElementById('loading').style.display = 'none';
+        
+        // Mostrar resultados de análisis
+        document.getElementById('analysisResults').style.display = 'block';
+        document.getElementById('analysisJson').textContent = JSON.stringify(analysisData, null, 2);
+        document.getElementById('analysisDetails').innerHTML = formatAnalysisResults(analysisData);
+        
+        // Mostrar resultado basado en la respuesta HTML del worker
+        if (content && content.trim() !== '' && content.includes('<html')) {
+          document.getElementById('success').style.display = 'block';
+        } else {
+          document.getElementById('noMatch').style.display = 'block';
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('noMatch').style.display = 'block';
+        
+        // Mostrar mensaje de error en resultados de análisis
+        document.getElementById('analysisResults').style.display = 'block';
+        document.getElementById('analysisDetails').innerHTML = `
+          <div class="error">
+            <strong>Error:</strong> ${error.message}
+          </div>
+        `;
+      }
+    }
+    
+    function formatAnalysisResults(data) {
+      let html = '';
+      
+      // Información general
+      html += `<h3>Información general</h3>`;
+      html += `<p><strong>Nombre buscado:</strong> ${data.nombreBuscado || data.analisis?.nombreBuscado || 'N/A'}</p>`;
+      html += `<p><strong>Encontrado:</strong> ${data.encontrado ? 'Sí' : 'No'}</p>`;
+      
+      if (data.encontrado) {
+        html += `<div class="${data.fechaValida ? 'success' : 'error'}">`;
+        html += `<p><strong>Fecha válida:</strong> ${data.fechaValida ? 'Sí' : 'No'}</p>`;
+        
+        if (data.analisis) {
+          const analisis = data.analisis;
+          html += `<p><strong>Documento ID:</strong> ${analisis.documentoId || 'N/A'}</p>`;
+          // Para este caso se muestra fecha de vencimiento en lugar de fecha de registro
+          html += `<p><strong>Fecha de vencimiento:</strong> ${analisis.fechaVencimientoOriginal || 'No especificada'}</p>`;
+          html += `<p><strong>Fecha de consulta:</strong> ${analisis.fechaConsulta || 'N/A'}</p>`;
+          html += `<p><strong>Razón de validez:</strong> ${analisis.razonValidez || 'N/A'}</p>`;
+        }
+        html += `</div>`;
+      }
+      
+      // Mostrar todos los documentos revisados si están disponibles
+      if (data.analisis && data.analisis.documentos && data.analisis.documentos.length > 0) {
+        html += `<h3>Documentos revisados (${data.analisis.documentos.length})</h3>`;
+        html += `<table>`;
+        html += `<tr>
+                    <th>ID</th>
+                    <th>Nombre SW</th>
+                    <th>Fecha vencimiento</th>
+                    <th>Fecha Válida</th>
+                    <th>Coincide</th>
+                </tr>`;
+                
+        data.analisis.documentos.forEach(doc => {
+          const rowClass = doc.coincide ? 'highlight' : '';
+          html += `<tr class="${rowClass}">
+                    <td>${doc.id || 'N/A'}</td>
+                    <td>${doc.nombreSW || 'N/A'}</td>
+                    <td>${doc.fechaVencimiento || 'No especificada'}</td>
+                    <td>${doc.fechaValida ? 'Sí' : 'No'}</td>
+                    <td>${doc.coincide ? 'Sí' : 'No'}</td>
+                  </tr>`;
+        });
+        
+        html += `</table>`;
+      }
+      
+      return html;
+    }
+    
+    // Ejecutar la verificación automáticamente al cargar la página
+    window.addEventListener('DOMContentLoaded', performCheck);
+  </script>
+</body>
+</html>

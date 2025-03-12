@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión de Notificaciones</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #4361ee;
+      --primary-light: #4895ef;
+      --primary-dark: #3a0ca3;
+      --secondary: #4cc9f0;
+      --success: #2ecc71;
+      --danger: #e74c3c;
+      --warning: #f39c12;
+      --dark: #2d3436;
+      --light: #f8f9fa;
+      --gray: #a0aec0;
+      --white: #ffffff;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+      --radius: 8px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f5f8fb;
+      color: var(--dark);
+      line-height: 1.6;
+    }
+
+    .navbar {
+      background-color: var(--primary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+
+    .navbar-brand {
+      color: var(--white);
+      font-size: 1.5rem;
+      font-weight: 700;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+    }
+
+    .navbar-brand i {
+      margin-right: 10px;
+    }
+
+    .btn {
+      padding: 0.5rem 1.25rem;
+      border-radius: var(--radius);
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background-color: var(--white);
+      color: var(--primary);
+    }
+
+    .btn-primary:hover {
+      background-color: #f0f0f0;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+
+    .btn-success {
+      background-color: var(--success);
+      color: var(--white);
+    }
+
+    .btn-success:hover {
+      background-color: #27ae60;
+      transform: translateY(-2px);
+    }
+
+    .btn-danger {
+      background-color: var(--danger);
+      color: var(--white);
+    }
+
+    .btn-danger:hover {
+      background-color: #c0392b;
+    }
+
+    .btn-warning {
+      background-color: var(--warning);
+      color: var(--white);
+    }
+
+    .btn-warning:hover {
+      background-color: #d35400;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 20px;
+    }
+
+    .card {
+      background-color: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+
+    .card-header {
+      background-color: var(--primary-light);
+      color: var(--white);
+      padding: 1.25rem;
+      font-size: 1.25rem;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-body {
+      padding: 1.5rem;
+    }
+
+    /* Herramientas de búsqueda y filtro */
+    .tools-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .search-box {
+      flex: 2;
+      position: relative;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 10px 40px 10px 15px;
+      border: 1px solid var(--gray);
+      border-radius: var(--radius);
+      font-size: 1rem;
+      transition: var(--transition);
+    }
+
+    .search-box input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.1);
+      outline: none;
+    }
+
+    .search-box i {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gray);
+    }
+
+    .filter-container {
+      flex: 1;
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .filter-select {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid var(--gray);
+      border-radius: var(--radius);
+      font-size: 0.9rem;
+      background-color: var(--white);
+      transition: var(--transition);
+      cursor: pointer;
+    }
+
+    .filter-select:focus {
+      border-color: var(--primary);
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.1);
+    }
+
+    /* Tabla */
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead th {
+      background-color: #eef2ff;
+      color: var(--primary-dark);
+      font-weight: 600;
+      text-align: left;
+      padding: 12px 15px;
+      border-bottom: 2px solid var(--primary-light);
+    }
+
+    tbody tr {
+      border-bottom: 1px solid #e2e8f0;
+      transition: var(--transition);
+    }
+
+    tbody tr:hover {
+      background-color: #f8fafc;
+    }
+
+    tbody td {
+      padding: 12px 15px;
+      vertical-align: middle;
+    }
+
+    .table-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    /* Vista de tarjetas para móvil */
+    .cards-view {
+      display: none;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .notification-card {
+      background-color: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1rem;
+      transition: var(--transition);
+    }
+
+    .notification-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .notification-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+
+    .notification-title {
+      font-weight: 600;
+      color: var(--dark);
+    }
+
+    .notification-date {
+      font-size: 0.85rem;
+      color: var(--gray);
+    }
+
+    .notification-content {
+      margin-bottom: 0.75rem;
+    }
+
+    .notification-content div {
+      margin-bottom: 0.5rem;
+      word-break: break-word;
+    }
+
+    .notification-content strong {
+      color: var(--primary-dark);
+    }
+
+    .notification-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+    }
+
+    /* Formulario de edición */
+    .edit-form {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+
+    .edit-form .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .edit-form .form-group.span-2 {
+      grid-column: span 2;
+    }
+
+    .edit-form label {
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      color: var(--dark);
+    }
+
+    .edit-form input,
+    .edit-form textarea,
+    .edit-form select {
+      padding: 10px;
+      border: 1px solid var(--gray);
+      border-radius: var(--radius);
+      font-family: 'Poppins', sans-serif;
+      transition: var(--transition);
+    }
+
+    .edit-form input:focus,
+    .edit-form textarea:focus,
+    .edit-form select:focus {
+      border-color: var(--primary);
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.1);
+    }
+
+    .edit-form textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .action-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    /* Paginación */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 2rem;
+      gap: 0.5rem;
+    }
+
+    .pagination button {
+      border: none;
+      background: var(--white);
+      color: var(--primary);
+      border-radius: var(--radius);
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .pagination button.active {
+      background: var(--primary);
+      color: var(--white);
+    }
+
+    .pagination button:hover:not(.active) {
+      background: #eef2ff;
+    }
+
+    .pagination button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Animaciones */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    /* Estilos responsivos */
+    @media (max-width: 992px) {
+      .filter-container {
+        flex-wrap: wrap;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .navbar {
+        padding: 1rem;
+      }
+
+      .navbar-brand span {
+        display: none;
+      }
+
+      .tools-container {
+        flex-direction: column;
+      }
+
+      .filter-container {
+        width: 100%;
+      }
+
+      .table-container {
+        display: none;
+      }
+
+      .cards-view {
+        display: flex;
+      }
+
+      .edit-form {
+        grid-template-columns: 1fr;
+      }
+
+      .edit-form .form-group.span-2 {
+        grid-column: span 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <a href="#" class="navbar-brand">
+      <i class="fas fa-bell"></i>
+      <span>Sistema de Notificaciones</span>
+    </a>
+    <button class="btn btn-primary" onclick="window.location.href='index.html';">
+      <i class="fas fa-plus"></i> Agregar Nueva
+    </button>
+  </nav>
+
+  <div class="container">
+    <div class="card">
+      <div class="card-header">
+        <h2>Gestión de Notificaciones</h2>
+        <div>
+          <!-- Podrías agregar botones adicionales aquí -->
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="tools-container">
+          <div class="search-box">
+            <input 
+              type="text" 
+              id="searchInput" 
+              placeholder="Buscar por correo, mensaje o proyecto..." 
+            />
+            <i class="fas fa-search"></i>
+          </div>
+          <div class="filter-container">
+            <select class="filter-select" id="filterDate">
+              <option value="">Todas las fechas</option>
+              <option value="current-month">Mes actual</option>
+              <option value="next-month">Próximo mes</option>
+              <option value="expired">Expiradas</option>
+            </select>
+            <select class="filter-select" id="sortBy">
+              <option value="date-asc">Fecha ↑</option>
+              <option value="date-desc">Fecha ↓</option>
+              <option value="project-asc">Proyecto A-Z</option>
+              <option value="project-desc">Proyecto Z-A</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Vista de tabla para escritorio -->
+        <div class="table-container fade-in">
+          <table>
+            <thead>
+              <tr>
+                <th>Correo</th>
+                <th>Fecha de Vencimiento</th>
+                <th>Project ID</th>
+                <th>Mensaje</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <!-- Datos se cargan dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Vista de tarjetas para móvil -->
+        <div class="cards-view fade-in" id="cardsView">
+          <!-- Datos se cargan dinámicamente -->
+        </div>
+
+        <div class="pagination" id="pagination">
+          <!-- Paginación se genera dinámicamente -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
+    import {
+      getFirestore,
+      collection,
+      getDocs,
+      doc,
+      updateDoc,
+      deleteDoc
+    } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+
+    // Configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAuPxS3VBwjv3w2yNsWWAYR4A-MeBctIn0",
+      authDomain: "system-of-notifications.firebaseapp.com",
+      projectId: "system-of-notifications",
+      storageBucket: "system-of-notifications.firebasestorage.app",
+      messagingSenderId: "190975028356",
+      appId: "1:190975028356:web:32e0892f48f6268614a6d1",
+      measurementId: "G-CZFGQC5D7B"
+    };
+
+    // Inicializar Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const db = getFirestore(app);
+
+    // Referencias
+    const tableBody = document.getElementById('tableBody');
+    const cardsView = document.getElementById('cardsView');
+    const searchInput = document.getElementById('searchInput');
+    const filterDate = document.getElementById('filterDate');
+    const sortBy = document.getElementById('sortBy');
+    const pagination = document.getElementById('pagination');
+
+    // Variables para filtrado y paginación
+    let allNotifications = [];
+    let filteredNotifications = [];
+    let currentPage = 1;
+    const itemsPerPage = 10;
+
+    // Evento de búsqueda en tiempo real
+    searchInput.addEventListener('input', handleSearch);
+    filterDate.addEventListener('change', handleFilters);
+    sortBy.addEventListener('change', handleFilters);
+
+    // Cargar datos desde Firestore
+    async function cargarNotificaciones() {
+      try {
+        const querySnapshot = await getDocs(collection(db, "notificaciones"));
+        allNotifications = [];
+        
+        querySnapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          allNotifications.push({
+            id: docSnap.id,
+            correo: data.correo || '',
+            fechaVencimiento: data.fechaVencimiento || '',
+            mensaje: data.mensaje || '',
+            nombreSW: data.nombreSW || '',
+            urlSW: data.urlSW || '',
+          });
+        });
+        
+        // Aplicar filtros iniciales y mostrar datos
+        handleFilters();
+      } catch (error) {
+        console.error("Error al cargar datos:", error);
+        mostrarMensaje('No se pudieron cargar las notificaciones', 'error');
+      }
+    }
+
+    // Manejar búsqueda y filtros
+    function handleSearch() {
+      handleFilters();
+    }
+
+    function handleFilters() {
+      const searchTerm = searchInput.value.toLowerCase();
+      const dateFilter = filterDate.value;
+      const sortOption = sortBy.value;
+      
+      // Filtrar por término de búsqueda
+      filteredNotifications = allNotifications.filter(item => {
+        return (
+          item.correo.toLowerCase().includes(searchTerm) ||
+          item.mensaje.toLowerCase().includes(searchTerm) ||
+          item.nombreSW.toLowerCase().includes(searchTerm)
+        );
+      });
+      
+      // Filtrar por fecha
+      if (dateFilter) {
+        const today = new Date();
+        const currentMonth = today.getMonth();
+        const currentYear = today.getFullYear();
+        
+        filteredNotifications = filteredNotifications.filter(item => {
+          if (!item.fechaVencimiento) return false;
+          
+          const itemDate = new Date(item.fechaVencimiento);
+          
+          switch (dateFilter) {
+            case 'current-month':
+              return itemDate.getMonth() === currentMonth && 
+                     itemDate.getFullYear() === currentYear;
+            case 'next-month':
+              return (itemDate.getMonth() === (currentMonth + 1) % 12) && 
+                     (currentMonth === 11 ? itemDate.getFullYear() === currentYear + 1 : 
+                                           itemDate.getFullYear() === currentYear);
+            case 'expired':
+              return itemDate < today;
+            default:
+              return true;
+          }
+        });
+      }
+      
+      // Ordenar resultados
+      switch (sortOption) {
+        case 'date-asc':
+          filteredNotifications.sort((a, b) => new Date(a.fechaVencimiento) - new Date(b.fechaVencimiento));
+          break;
+        case 'date-desc':
+          filteredNotifications.sort((a, b) => new Date(b.fechaVencimiento) - new Date(a.fechaVencimiento));
+          break;
+        case 'project-asc':
+          filteredNotifications.sort((a, b) => a.nombreSW.localeCompare(b.nombreSW));
+          break;
+        case 'project-desc':
+          filteredNotifications.sort((a, b) => b.nombreSW.localeCompare(a.nombreSW));
+          break;
+      }
+      
+      // Reiniciar paginación
+      currentPage = 1;
+      renderizarDatos();
+    }
+
+    // Funciones para renderizar datos
+    function renderizarDatos() {
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const paginatedItems = filteredNotifications.slice(startIndex, startIndex + itemsPerPage);
+      
+      renderizarTabla(paginatedItems);
+      renderizarTarjetas(paginatedItems);
+      renderizarPaginacion();
+    }
+
+    function renderizarTabla(items) {
+      tableBody.innerHTML = '';
+      
+      if (items.length === 0) {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td colspan="5" style="text-align: center;">No se encontraron notificaciones</td>`;
+        tableBody.appendChild(row);
+        return;
+      }
+      
+      items.forEach(item => {
+        const row = document.createElement('tr');
+        
+        // Formatear fecha para mostrar
+        const fechaFormateada = item.fechaVencimiento 
+          ? new Date(item.fechaVencimiento).toLocaleDateString('es-ES', { 
+              day: '2-digit', month: 'long', year: 'numeric'
+            })
+          : 'No establecida';
+        
+        row.innerHTML = `
+          <td>${item.correo}</td>
+          <td>${fechaFormateada}</td>
+          <td>${item.nombreSW}</td>
+          <td>${item.mensaje.length > 50 ? item.mensaje.substring(0, 50) + '...' : item.mensaje}</td>
+          <td class="table-actions">
+            <button class="btn btn-warning" onclick="window.editarNotificacion('${item.id}')">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button class="btn btn-danger" onclick="window.eliminarNotificacion('${item.id}')">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </td>
+        `;
+        
+        tableBody.appendChild(row);
+      });
+    }
+
+    function renderizarTarjetas(items) {
+      cardsView.innerHTML = '';
+      
+      if (items.length === 0) {
+        cardsView.innerHTML = `
+          <div class="notification-card" style="text-align: center;">
+            <p>No se encontraron notificaciones</p>
+          </div>
+        `;
+        return;
+      }
+      
+      items.forEach(item => {
+        const fechaFormateada = item.fechaVencimiento 
+          ? new Date(item.fechaVencimiento).toLocaleDateString('es-ES', { 
+              day: '2-digit', month: 'long', year: 'numeric'
+            })
+          : 'No establecida';
+        
+        const card = document.createElement('div');
+        card.className = 'notification-card fade-in';
+        
+        card.innerHTML = `
+          <div class="notification-header">
+            <div class="notification-title">${item.nombreSW}</div>
+            <div class="notification-date">${fechaFormateada}</div>
+          </div>
+          <div class="notification-content">
+            <div><strong>Correo:</strong> ${item.correo}</div>
+            <div><strong>Mensaje:</strong> ${item.mensaje}</div>
+            <div><strong>URL:</strong> <a href="${item.urlSW}" target="_blank">${item.urlSW}</a></div>
+          </div>
+          <div class="notification-actions">
+            <button class="btn btn-warning" onclick="window.editarNotificacion('${item.id}')">
+              <i class="fas fa-edit"></i> Editar
+            </button>
+            <button class="btn btn-danger" onclick="window.eliminarNotificacion('${item.id}')">
+              <i class="fas fa-trash-alt"></i> Eliminar
+            </button>
+          </div>
+        `;
+        
+        cardsView.appendChild(card);
+      });
+    }
+
+    function renderizarPaginacion() {
+      pagination.innerHTML = '';
+      
+      const totalPages = Math.ceil(filteredNotifications.length / itemsPerPage);
+      
+      if (totalPages <= 1) return;
+      
+      // Botón "Anterior"
+      const prevButton = document.createElement('button');
+      prevButton.innerHTML = '<i class="fas fa-chevron-left"></i>';
+      prevButton.disabled = currentPage === 1;
+      prevButton.addEventListener('click', () => {
+        if (currentPage > 1) {
+          currentPage--;
+          renderizarDatos();
+        }
+      });
+      pagination.appendChild(prevButton);
+      
+      // Números de página
+      const maxVisiblePages = 5;
+      let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+      let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+      
+      if (endPage - startPage + 1 < maxVisiblePages) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+      }
+      
+      for (let i = startPage; i <= endPage; i++) {
+        const pageButton = document.createElement('button');
+        pageButton.innerText = i;
+        pageButton.className = i === currentPage ? 'active' : '';
+        pageButton.addEventListener('click', () => {
+          currentPage = i;
+          renderizarDatos();
+        });
+        pagination.appendChild(pageButton);
+      }
+      
+      // Botón "Siguiente"
+      const nextButton = document.createElement('button');
+      nextButton.innerHTML = '<i class="fas fa-chevron-right"></i>';
+      nextButton.disabled = currentPage === totalPages;
+      nextButton.addEventListener('click', () => {
+        if (currentPage < totalPages) {
+          currentPage++;
+          renderizarDatos();
+        }
+      });
+      pagination.appendChild(nextButton);
+    }
+
+    // Función para editar notificación
+    window.editarNotificacion = async function(id) {
+      const item = allNotifications.find(n => n.id === id);
+      if (!item) return;
+      
+      // Crear formulario de edición
+      const formHTML = `
+        <div class="edit-form fade-in">
+          <div class="form-group">
+            <label>Correo electrónico</label>
+            <input type="email" id="edit-correo" value="${item.correo}" required>
+          </div>
+          
+          <div class="form-group">
+            <label>Fecha de Vencimiento</label>
+            <input type="date" id="edit-fecha" value="${item.fechaVencimiento}" required>
+          </div>
+          
+          <div class="form-group span-2">
+            <label>Mensaje</label>
+            <textarea id="edit-mensaje" required>${item.mensaje}</textarea>
+          </div>
+          
+          <div class="form-group">
+            <label>Project ID</label>
+            <input type="text" id="edit-nombre" value="${item.nombreSW}" required>
+          </div>
+          
+          <div class="form-group">
+            <label>URL del SW</label>
+            <input type="url" id="edit-url" value="${item.urlSW}" required>
+          </div>
+          
+          <div class="form-group span-2 action-buttons">
+            <button id="btn-cancelar" class="btn btn-danger">
+              <i class="fas fa-times"></i> Cancelar
+            </button>
+            <button id="btn-guardar" class="btn btn-success">
+              <i class="fas fa-save"></i> Guardar Cambios
+            </button>
+          </div>
+        </div>
+      `;
+      
+      // Crear modal o reemplazar contenido
+      const modalContainer = document.createElement('div');
+      modalContainer.style.position = 'fixed';
+      modalContainer.style.top = '0';
+      modalContainer.style.left = '0';
+      modalContainer.style.width = '100%';
+      modalContainer.style.height = '100%';
+      modalContainer.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+      modalContainer.style.display = 'flex';
+      modalContainer.style.justifyContent = 'center';
+      modalContainer.style.alignItems = 'center';
+      modalContainer.style.zIndex = '1000';
+      modalContainer.style.padding = '20px';
+      
+      const modalContent = document.createElement('div');
+      modalContent.style.backgroundColor = '#fff';
+      modalContent.style.borderRadius = '8px';
+      modalContent.style.width = '100%';
+      modalContent.style.maxWidth = '600px';
+      modalContent.style.maxHeight = '90vh';
+      modalContent.style.overflow = 'auto';
+      modalContent.style.padding = '20px';
+      
+      modalContent.innerHTML = `
+        <h2 style="margin-bottom: 20px;">Editar Notificación</h2>
+        ${formHTML}
+      `;
+      
+      modalContainer.appendChild(modalContent);
+      document.body.appendChild(modalContainer);
+      
+      // Agregar event listeners
+      document.getElementById('btn-cancelar').addEventListener('click', () => {
+        document.body.removeChild(modalContainer);
+      });
+      
+      document.getElementById('btn-guardar').addEventListener('click', async () => {
+        // Obtener los valores actualizados
+        const correo = document.getElementById('edit-correo').value;
+        const fechaVencimiento = document.getElementById('edit-fecha').value;
+        const mensaje = document.getElementById('edit-mensaje').value;
+        const nombreSW = document.getElementById('edit-nombre').value;
+        const urlSW = document.getElementById('edit-url').value;
+        
+        // Validar campos requeridos
+        if (!correo || !fechaVencimiento || !mensaje || !nombreSW || !urlSW) {
+          mostrarMensaje('Por favor completa todos los campos requeridos', 'error');
+          return;
+        }
+        
+        try {
+          // Actualizar documento en Firestore
+          const docRef = doc(db, "notificaciones", id);
+          await updateDoc(docRef, {
+            correo,
+            fechaVencimiento,
+            mensaje,
+            nombreSW,
+            urlSW,
+            fechaActualizacion: new Date()
+          });
+          
+          // Cerrar modal y actualizar vista
+          document.body.removeChild(modalContainer);
+          mostrarMensaje('Notificación actualizada correctamente', 'success');
+          
+          // Refrescar los datos
+          await cargarNotificaciones();
+        } catch (error) {
+          console.error("Error al actualizar:", error);
+          mostrarMensaje('Error al actualizar la notificación', 'error');
+        }
+      });
+    };
+    
+    // Función para eliminar notificación
+    window.eliminarNotificacion = async function(id) {
+      if (!confirm('¿Estás seguro de que deseas eliminar esta notificación?')) return;
+      
+      try {
+        const docRef = doc(db, "notificaciones", id);
+        await deleteDoc(docRef);
+        mostrarMensaje('Notificación eliminada correctamente', 'success');
+        await cargarNotificaciones();
+      } catch (error) {
+        console.error("Error al eliminar:", error);
+        mostrarMensaje('Error al eliminar la notificación', 'error');
+      }
+    };
+    
+    // Función para mostrar mensajes de feedback
+    function mostrarMensaje(mensaje, tipo) {
+      // Crear elemento del mensaje
+      const mensajeElement = document.createElement('div');
+      mensajeElement.className = `mensaje-toast ${tipo} fade-in`;
+      mensajeElement.style.position = 'fixed';
+      mensajeElement.style.bottom = '20px';
+      mensajeElement.style.right = '20px';
+      mensajeElement.style.padding = '15px 20px';
+      mensajeElement.style.borderRadius = 'var(--radius)';
+      mensajeElement.style.backgroundColor = tipo === 'success' ? 'rgba(46, 204, 113, 0.9)' : 'rgba(231, 76, 60, 0.9)';
+      mensajeElement.style.color = '#fff';
+      mensajeElement.style.boxShadow = 'var(--shadow)';
+      mensajeElement.style.zIndex = '2000';
+      mensajeElement.style.maxWidth = '300px';
+      mensajeElement.style.display = 'flex';
+      mensajeElement.style.alignItems = 'center';
+      mensajeElement.style.gap = '10px';
+      
+      const icon = tipo === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+      
+      mensajeElement.innerHTML = `
+        <i class="fas ${icon}"></i>
+        <span>${mensaje}</span>
+      `;
+      
+      document.body.appendChild(mensajeElement);
+      
+      // Eliminar después de 3 segundos
+      setTimeout(() => {
+        mensajeElement.classList.remove('fade-in');
+        mensajeElement.style.opacity = '0';
+        mensajeElement.style.transform = 'translateY(20px)';
+        mensajeElement.style.transition = 'opacity 0.3s, transform 0.3s';
+        
+        setTimeout(() => {
+          document.body.removeChild(mensajeElement);
+        }, 300);
+      }, 3000);
+    }
+    
+    // Iniciar la aplicación cargando los datos
+    cargarNotificaciones();
+  </script>
+</body>
+</html>

